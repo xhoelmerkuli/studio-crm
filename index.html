@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio CRM — Client Intake Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f0efeb;
+    --border: rgba(0,0,0,0.08);
+    --border-md: rgba(0,0,0,0.13);
+    --text: #1a1a18;
+    --text-2: #6b6b67;
+    --text-3: #a8a8a4;
+    --accent: #1a1a18;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --badge-active-bg: #e6f4ec; --badge-active-text: #1e6b3a;
+    --badge-lead-bg: #fef3e2; --badge-lead-text: #8a5a00;
+    --badge-closed-bg: #efefef; --badge-closed-text: #555552;
+    --badge-paused-bg: #fde8f0; --badge-paused-text: #8a2248;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 14px; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* LAYOUT */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 0.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 2rem; padding: 0 0.25rem;
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--text);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-mark i { color: #fff; font-size: 15px; }
+  .logo-name { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; }
+  .logo-sub { font-size: 11px; color: var(--text-2); }
+
+  .nav-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+    color: var(--text-3); text-transform: uppercase;
+    padding: 0 0.5rem; margin-bottom: 0.5rem; margin-top: 0.75rem;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: var(--radius);
+    font-size: 13px; color: var(--text-2);
+    cursor: pointer; transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item i { font-size: 16px; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--text); color: #fff; }
+  .nav-item.active i { color: #fff; }
+
+  .sidebar-foot {
+    margin-top: auto;
+    border-top: 0.5px solid var(--border);
+    padding-top: 1rem;
+  }
+  .user-chip {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: var(--radius);
+  }
+  .user-av {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #e6edf8; color: #2a5cb8;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; font-weight: 500; }
+  .user-role { font-size: 10px; color: var(--text-2); }
+
+  /* MAIN */
+  .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0.875rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .page-title { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+  .page-sub { font-size: 12px; color: var(--text-2); margin-top: 1px; }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: var(--radius);
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    transition: all 0.15s; font-family: inherit;
+    border: 0.5px solid var(--border-md);
+    background: var(--surface); color: var(--text);
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn-primary {
+    background: var(--text); color: #fff;
+    border-color: var(--text);
+  }
+  .btn-primary:hover { background: #333330; }
+  .btn i { font-size: 14px; }
+
+  /* CONTENT */
+  .content { padding: 1.75rem 2rem; }
+
+  /* STAT CARDS */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.75rem; }
+  .stat-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.125rem 1.25rem;
+    transition: box-shadow 0.15s;
+  }
+  .stat-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .stat-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stat-icon i { font-size: 16px; }
+  .si-blue { background: #e8f0fc; color: #2a5cb8; }
+  .si-green { background: #e6f4ec; color: #1e6b3a; }
+  .si-amber { background: #fef3e2; color: #8a5a00; }
+  .si-purple { background: #eeebfc; color: #5b3dc0; }
+  .stat-label { font-size: 11px; color: var(--text-2); font-weight: 400; }
+  .stat-value { font-size: 26px; font-weight: 400; letter-spacing: -0.03em; font-family: 'DM Mono', monospace; }
+  .stat-change { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+
+  /* TABLE SECTION */
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .filters { display: flex; align-items: center; gap: 6px; }
+  .filter-pill {
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; cursor: pointer;
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text-2);
+    transition: all 0.12s; font-family: inherit;
+  }
+  .filter-pill:hover { border-color: var(--border-md); color: var(--text); }
+  .filter-pill.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+  .search-wrap { position: relative; }
+  .search-wrap i {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text-3); font-size: 14px; pointer-events: none;
+  }
+  .search-input {
+    padding: 7px 10px 7px 32px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: 12px; color: var(--text);
+    font-family: inherit; width: 220px;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { outline: none; border-color: var(--border-md); }
+  .search-input::placeholder { color: var(--text-3); }
+
+  /* TABLE */
+  .table-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  col.c-client { width: 22%; }
+  col.c-project { width: 18%; }
+  col.c-email { width: 19%; }
+  col.c-budget { width: 10%; }
+  col.c-date { width: 12%; }
+  col.c-status { width: 11%; }
+  col.c-actions { width: 8%; }
+  thead { background: var(--bg); }
+  th {
+    padding: 10px 16px;
+    text-align: left; font-size: 10px; font-weight: 500;
+    color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase;
+    border-bottom: 0.5px solid var(--border);
+  }
+  td {
+    padding: 13px 16px; font-size: 13px;
+    border-bottom: 0.5px solid var(--border);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background 0.1s; cursor: pointer; }
+  tbody tr:hover { background: var(--bg); }
+
+  .cell-name { display: flex; align-items: center; gap: 10px; }
+  .av {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; flex-shrink: 0;
+  }
+  .cn { font-size: 13px; font-weight: 500; line-height: 1.3; }
+  .cc { font-size: 11px; color: var(--text-2); }
+
+  .badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 20px; font-size: 11px; font-weight: 500;
+  }
+  .b-active { background: var(--badge-active-bg); color: var(--badge-active-text); }
+  .b-lead   { background: var(--badge-lead-bg);   color: var(--badge-lead-text); }
+  .b-closed { background: var(--badge-closed-bg); color: var(--badge-closed-text); }
+  .b-paused { background: var(--badge-paused-bg); color: var(--badge-paused-text); }
+
+  .action-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-3); padding: 5px; border-radius: 6px;
+    transition: all 0.12s; font-size: 15px;
+    display: inline-flex; align-items: center;
+  }
+  .action-btn:hover { color: var(--text); background: var(--surface2); }
+
+  .empty-row td {
+    text-align: center; padding: 3rem; color: var(--text-2);
+    font-size: 13px;
+  }
+
+  /* EXPORT */
+  .export-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 0.5px solid var(--border);
+    background: var(--bg);
+  }
+  .export-info { font-size: 11px; color: var(--text-2); }
+
+  /* SLIDE-IN PANEL */
+  .backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(20,20,18,0.3); z-index: 50;
+    backdrop-filter: blur(2px);
+  }
+  .backdrop.open { display: block; }
+  .panel {
+    position: fixed; top: 0; right: -440px; bottom: 0; width: 420px;
+    background: var(--surface);
+    border-left: 0.5px solid var(--border);
+    z-index: 51; overflow-y: auto;
+    transition: right 0.25s cubic-bezier(0.4,0,0.2,1);
+    display: flex; flex-direction: column;
+  }
+  .panel.open { right: 0; }
+  .panel-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .panel-title { font-size: 14px; font-weight: 500; }
+  .panel-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+  .panel-foot {
+    padding: 1rem 1.5rem;
+    border-top: 0.5px solid var(--border);
+    background: var(--surface);
+  }
+
+  .fg { display: flex; flex-direction: column; gap: 5px; }
+  .fl { font-size: 11px; color: var(--text-2); font-weight: 500; letter-spacing: 0.02em; }
+  .fi {
+    padding: 8px 11px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px; color: var(--text);
+    font-family: inherit; background: var(--surface);
+    transition: border-color 0.15s; width: 100%;
+  }
+  .fi:focus { outline: none; border-color: var(--border-md); }
+  .fi::placeholder { color: var(--text-3); }
+  textarea.fi { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* DETAIL PANEL */
+  .detail-hero {
+    padding: 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .detail-av {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 400; flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .detail-name { font-size: 16px; font-weight: 500; }
+  .detail-co { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .detail-fields { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0; }
+  .df-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 0; border-bottom: 0.5px solid var(--border);
+  }
+  .df-row:last-child { border-bottom: none; }
+  .df-key { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 7px; }
+  .df-key i { font-size: 14px; }
+  .df-val { font-size: 13px; font-weight: 500; text-align: right; max-width: 55%; word-break: break-word; white-space: normal; }
+  .notes-box {
+    margin: 0 1.5rem 1.5rem;
+    padding: 12px 14px;
+    background: var(--bg);
+    border-radius: var(--radius);
+    font-size: 12px; color: var(--text-2); line-height: 1.6;
+  }
+  .notes-label { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(60px);
+    background: var(--text); color: #fff;
+    padding: 10px 18px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    z-index: 100; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .stat-card { animation: fadeInUp 0.3s ease both; }
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.10s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.20s; }
+  .table-card { animation: fadeInUp 0.35s 0.2s ease both; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark"><i class="ti ti-layout-grid"></i></div>
+      <div>
+        <div class="logo-name">Studio CRM</div>
+        <div class="logo-sub">Client Manager</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Kryesorja</div>
+    <a class="nav-item active" href="#">
+      <i class="ti ti-users"></i> Klientët
+    </a>
+    <a class="nav-item" href="#">
+      <i class="ti ti-chart-bar"></i> Statistika
+    </a>
+    <a class="nav-item" href="#">
+      <i class="ti ti-briefcase"></i> Projektet
+    </a>
+
+    <div class="nav-label">Tjera</div>
+    <a class="nav-item" href="#">
+      <i class="ti ti-settings"></i> Cilësimet
+    </a>
+
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        <div class="user-av">XM</div>
+        <div>
+          <div class="user-name">Xhoel Merkuli</div>
+          <div class="user-role">Studio Owner</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title">Klientët</div>
+        <div class="page-sub">Menaxho klientët dhe projektet e studios</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn" onclick="exportCSV()"><i class="ti ti-download"></i> Eksporto CSV</button>
+        <button class="btn btn-primary" onclick="openAdd()"><i class="ti ti-plus"></i> Klient i ri</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- STATS -->
+      <div class="stats" id="statsGrid"></div>
+
+      <!-- TABLE CONTROLS -->
+      <div class="section-head">
+        <div class="filters" id="filterBar">
+          <button class="filter-pill active" data-filter="all">Të gjithë</button>
+          <button class="filter-pill" data-filter="Active">Aktiv</button>
+          <button class="filter-pill" data-filter="Lead">Lead</button>
+          <button class="filter-pill" data-filter="Closed">Closed</button>
+          <button class="filter-pill" data-filter="Paused">Paused</button>
+        </div>
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input class="search-input" type="text" id="searchInput" placeholder="Kërko klient, kompani...">
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-card">
+        <table>
+          <colgroup>
+            <col class="c-client"><col class="c-project">
+            <col class="c-email"><col class="c-budget">
+            <col class="c-date"><col class="c-status"><col class="c-actions">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Klienti</th><th>Projekti</th><th>Email</th>
+              <th>Budget</th><th>Fillimi</th><th>Statusi</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div class="export-row">
+          <span class="export-info" id="rowCount">— rekorde</span>
+          <span class="export-info">Studio CRM &mdash; xhoelmerkuli</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BACKDROP + PANEL -->
+<div class="backdrop" id="addBackdrop" onclick="closeAdd()"></div>
+<div class="panel" id="addPanel">
+  <div class="panel-head">
+    <div class="panel-title">Klient i ri</div>
+    <button class="action-btn" onclick="closeAdd()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="panel-body">
+    <div class="form-row">
+      <div class="fg"><label class="fl">Emri</label><input class="fi" id="f-name" placeholder="Emri"></div>
+      <div class="fg"><label class="fl">Mbiemri</label><input class="fi" id="f-surname" placeholder="Mbiemri"></div>
+    </div>
+    <div class="fg"><label class="fl">Kompania</label><input class="fi" id="f-company" placeholder="Emri i kompanisë"></div>
+    <div class="fg"><label class="fl">Email</label><input class="fi" id="f-email" type="email" placeholder="email@kompania.com"></div>
+    <div class="fg"><label class="fl">Lloji i projektit</label><input class="fi" id="f-project" placeholder="p.sh. Brand Identity, Web Design..."></div>
+    <div class="form-row">
+      <div class="fg"><label class="fl">Budget (€)</label><input class="fi" id="f-budget" type="number" placeholder="0"></div>
+      <div class="fg"><label class="fl">Statusi</label>
+        <select class="fi" id="f-status">
+          <option value="Lead">Lead</option>
+          <option value="Active">Active</option>
+          <option value="Paused">Paused</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Vërejtje</label><textarea class="fi" id="f-notes" placeholder="Shënime shtesë mbi projektin..."></textarea></div>
+  </div>
+  <div class="panel-foot">
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveClient()">
+      <i class="ti ti-check"></i> Ruaj klientin
+    </button>
+  </div>
+</div>
+
+<!-- DETAIL BACKDROP + PANEL -->
+<div class="backdrop" id="detailBackdrop" onclick="closeDetail()"></div>
+<div class="panel" id="detailPanel"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const COLORS = [
+  {bg:'#e8f0fc',text:'#2a5cb8'},{bg:'#e6f4ec',text:'#1e6b3a'},
+  {bg:'#fef3e2',text:'#8a5a00'},{bg:'#fde8f0',text:'#8a2248'},
+  {bg:'#eeebfc',text:'#5b3dc0'},{bg:'#fce8e6',text:'#8a2a20'},
+  {bg:'#e8f5f0',text:'#1a6650'},{bg:'#f5f0fe',text:'#6040b0'}
+];
+function colorFor(s){const i=(s.charCodeAt(0)*3+s.charCodeAt(1))%COLORS.length;return COLORS[i]}
+function initials(n){const p=n.trim().split(' ');return(p[0][0]+(p[1]?p[1][0]:p[0][1]||'')).toUpperCase()}
+function badgeClass(s){return s==='Active'?'b-active':s==='Lead'?'b-lead':s==='Paused'?'b-paused':'b-closed'}
+
+let clients = [
+  {id:1,name:'Marko Leka',company:'Studio Leka SH.P.K',email:'marko@studioleka.al',project:'Brand Identity',budget:2400,start:'2025-03-10',status:'Active',notes:'Rebranding i plotë — logo, tipografi, brand guide 40 faqe.'},
+  {id:2,name:'Rina Dervishi',company:'Boutique Ora',email:'rina.dervishi@ora.al',project:'Web Redesign',budget:1800,start:'2025-04-01',status:'Lead',notes:'Interesohet për web + foto produktesh. Ende në negocim çmimi.'},
+  {id:3,name:'Gentian Hoxha',company:'Hoxha & Partners',email:'g.hoxha@hpartners.al',project:'Pitch Deck',budget:900,start:'2025-02-14',status:'Closed',notes:'Prezantim për investitorë, 20 faqe. Dorëzuar dhe aprovuar.'},
+  {id:4,name:'Elsa Marku',company:'Marku Events',email:'elsa@markuevents.al',project:'Visual Identity',budget:3200,start:'2025-05-05',status:'Active',notes:'Identitet vizual për agjenci eventesh. Në fazën e dytë.'},
+  {id:5,name:'Arben Gjoni',company:'GjoniBuild SH.P.K',email:'arben@gjonibuild.al',project:'Katalog Print',budget:650,start:'2025-01-20',status:'Closed',notes:'Katalog 48 faqe offset print. Shtypur dhe dorëzuar.'},
+  {id:6,name:'Drita Kola',company:'Kola Clinic',email:'drita@kolaclinic.al',project:'UI/UX App',budget:4500,start:'2025-05-18',status:'Active',notes:'Aplikacion rezervimi pacientësh. Wireframes aprovuar, po ndërtojmë UI.'},
+  {id:7,name:'Besmir Shehu',company:'Shehu Motors',email:'b.shehu@shehucars.al',project:'Social Media Kit',budget:780,start:'2025-03-28',status:'Paused',notes:'Klienti ka ndryshuar prioritetet. Rimerr kontaktin në shtator.'},
+  {id:8,name:'Florinda Çoba',company:'Çoba Bakery',email:'florinda@cobabakery.al',project:'Packaging Design',budget:1100,start:'2025-04-15',status:'Active',notes:'Dizajn paketimi për 6 produkte buke. Revizion i dytë duke u bërë.'},
+  {id:9,name:'Ilir Musa',company:'Musa Group',email:'ilir@musagroup.al',project:'Annual Report',budget:2200,start:'2025-02-01',status:'Closed',notes:'Raport vjetor 2024, 60 faqe. Dorëzuar dhe shtypur.'},
+  {id:10,name:'Teuta Bardhi',company:'Bardhi Fashion',email:'teuta@bardhifashion.al',project:'Lookbook',budget:1600,start:'2025-05-01',status:'Lead',notes:'Lookbook sezonal, 24 faqe. Duke pritur mostrat e produkteve.'},
+  {id:11,name:'Sokol Hysa',company:'Hysa Tech',email:'sokol@hysatech.al',project:'SaaS Landing Page',budget:2900,start:'2025-04-22',status:'Active',notes:'Landing page + micro-animations. Faza e implementimit.'},
+  {id:12,name:'Mirela Prendi',company:'Prendi Interiors',email:'m.prendi@prendistudio.al',project:'Portfolio Site',budget:1350,start:'2025-03-05',status:'Paused',notes:'Pret aprovimin e contentit fotografik nga klienti.'},
+  {id:13,name:'Alban Zeqiri',company:'Zeqiri Coffee',email:'alban@zeqiricoffee.al',project:'Brand Refresh',budget:1750,start:'2025-05-12',status:'Lead',notes:'Modernizim logo + packaging kafe. Takim i parë i kryer.'},
+  {id:14,name:'Vjosa Hasani',company:'Hasani Law Firm',email:'vjosa@hasanilaw.al',project:'Website',budget:2100,start:'2025-01-15',status:'Closed',notes:'Faqe institucionale 8 seksione. Live nga shkurti 2025.'},
+  {id:15,name:'Luan Berisha',company:'Berisha Consulting',email:'luan@berishaconsulting.al',project:'Brochure + PPT',budget:880,start:'2025-04-08',status:'Active',notes:'Material prezantimi korporativ. Broshura gati, PPT në progres.'},
+];
+let nextId = 16;
+let currentFilter = 'all';
+
+function renderStats(){
+  const total = clients.length;
+  const active = clients.filter(c=>c.status==='Active').length;
+  const leads  = clients.filter(c=>c.status==='Lead').length;
+  const revenue = clients.filter(c=>c.status==='Closed').reduce((s,c)=>s+c.budget,0);
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-top"><div class="stat-label">Gjithsej klientë</div><div class="stat-icon si-blue"><i class="ti ti-users"></i></div></div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-change">Të gjitha rekordet</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-top"><div class="stat-label">Aktiv tani</div><div class="stat-icon si-green"><i class="ti ti-activity"></i></div></div>
+      <div class="stat-value">${active}</div>
+      <div class="stat-change">Projekte në vazhdim</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-top"><div class="stat-label">Leads në pritje</div><div class="stat-icon si-amber"><i class="ti ti-clock"></i></div></div>
+      <div class="stat-value">${leads}</div>
+      <div class="stat-change">Negociata aktive</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-top"><div class="stat-label">Revenue (closed)</div><div class="stat-icon si-purple"><i class="ti ti-currency-euro"></i></div></div>
+      <div class="stat-value">€${revenue.toLocaleString()}</div>
+      <div class="stat-change">Projekte të mbyllura</div>
+    </div>
+  `;
+}
+
+function renderTable(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = clients.filter(c => {
+    const match = c.name.toLowerCase().includes(q) ||
+                  c.company.toLowerCase().includes(q) ||
+                  c.project.toLowerCase().includes(q) ||
+                  c.email.toLowerCase().includes(q);
+    const sf = currentFilter === 'all' || c.status === currentFilter;
+    return match && sf;
+  });
+  document.getElementById('rowCount').textContent = `${filtered.length} rekorde`;
+  const body = document.getElementById('tableBody');
+  if(!filtered.length){
+    body.innerHTML = `<tr class="empty-row"><td colspan="7">Nuk u gjet asnjë klient.</td></tr>`;
+    return;
+  }
+  body.innerHTML = filtered.map(c => {
+    const col = colorFor(c.name);
+    const ini = initials(c.name);
+    const bc  = badgeClass(c.status);
+    return `<tr onclick="openDetail(${c.id})">
+      <td><div class="cell-name">
+        <div class="av" style="background:${col.bg};color:${col.text}">${ini}</div>
+        <div><div class="cn">${c.name}</div><div class="cc">${c.company}</div></div>
+      </div></td>
+      <td>${c.project}</td>
+      <td style="color:var(--text-2);font-size:12px">${c.email}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">€${c.budget.toLocaleString()}</td>
+      <td style="color:var(--text-2)">${c.start}</td>
+      <td><span class="badge ${bc}">${c.status}</span></td>
+      <td>
+        <button class="action-btn" onclick="event.stopPropagation();deleteClient(${c.id})" title="Fshi">
+          <i class="ti ti-trash"></i>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function render(){ renderStats(); renderTable(); }
+
+// FILTER
+document.getElementById('filterBar').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-pill');
+  if(!btn) return;
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = btn.dataset.filter;
+  renderTable();
+});
+
+// SEARCH
+document.getElementById('searchInput').addEventListener('input', renderTable);
+
+// ADD
+function openAdd(){ document.getElementById('addBackdrop').classList.add('open'); document.getElementById('addPanel').classList.add('open'); }
+function closeAdd(){ document.getElementById('addBackdrop').classList.remove('open'); document.getElementById('addPanel').classList.remove('open'); }
+
+function saveClient(){
+  const n = document.getElementById('f-name').value.trim();
+  const s = document.getElementById('f-surname').value.trim();
+  if(!n){ showToast('Emri është i detyrueshëm.'); return; }
+  const today = new Date().toISOString().split('T')[0];
+  clients.unshift({
+    id: nextId++,
+    name: n + (s ? ' '+s : ''),
+    company: document.getElementById('f-company').value || '—',
+    email: document.getElementById('f-email').value || '—',
+    project: document.getElementById('f-project').value || '—',
+    budget: parseInt(document.getElementById('f-budget').value) || 0,
+    start: today,
+    status: document.getElementById('f-status').value,
+    notes: document.getElementById('f-notes').value || ''
+  });
+  ['f-name','f-surname','f-company','f-email','f-project','f-budget','f-notes'].forEach(id => document.getElementById(id).value = '');
+  closeAdd(); render(); showToast('Klienti u shtua me sukses.');
+}
+
+// DELETE
+function deleteClient(id){
+  clients = clients.filter(c => c.id !== id);
+  render(); showToast('Klienti u fshi.');
+}
+
+// DETAIL
+function openDetail(id){
+  const c = clients.find(x => x.id === id);
+  if(!c) return;
+  const col = colorFor(c.name);
+  const ini = initials(c.name);
+  const bc  = badgeClass(c.status);
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="panel-head">
+      <div class="panel-title">Detajet e klientit</div>
+      <button class="action-btn" onclick="closeDetail()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="detail-hero">
+      <div class="detail-av" style="background:${col.bg};color:${col.text}">${ini}</div>
+      <div>
+        <div class="detail-name">${c.name}</div>
+        <div class="detail-co">${c.company}</div>
+        <span class="badge ${bc}" style="margin-top:6px;display:inline-block">${c.status}</span>
+      </div>
+    </div>
+    <div class="detail-fields">
+      <div class="df-row"><span class="df-key"><i class="ti ti-briefcase"></i> Projekti</span><span class="df-val">${c.project}</span></div>
+      <div class="df-row"><span class="df-key"><i class="ti ti-currency-euro"></i> Budget</span><span class="df-val" style="font-family:'DM Mono',monospace">€${c.budget.toLocaleString()}</span></div>
+      <div class="df-row"><span class="df-key"><i class="ti ti-mail"></i> Email</span><span class="df-val" style="font-size:12px">${c.email}</span></div>
+      <div class="df-row"><span class="df-key"><i class="ti ti-calendar"></i> Data fillimit</span><span class="df-val">${c.start}</span></div>
+      <div class="df-row"><span class="df-key"><i class="ti ti-id"></i> ID Klientit</span><span class="df-val" style="font-family:'DM Mono',monospace;font-size:12px">#${String(c.id).padStart(4,'0')}</span></div>
+    </div>
+    ${c.notes ? `<div class="notes-box"><div class="notes-label">Vërejtje</div>${c.notes}</div>` : ''}
+    <div style="padding:0 1.5rem 1.5rem">
+      <button class="btn" style="width:100%;justify-content:center;color:var(--badge-paused-text);border-color:var(--badge-paused-bg)" onclick="closeDetail();deleteClient(${c.id})">
+        <i class="ti ti-trash"></i> Fshi klientin
+      </button>
+    </div>
+  `;
+  document.getElementById('detailBackdrop').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+}
+function closeDetail(){
+  document.getElementById('detailBackdrop').classList.remove('open');
+  document.getElementById('detailPanel').classList.remove('open');
+}
+
+// EXPORT CSV
+function exportCSV(){
+  const headers = ['ID','Emri','Kompania','Email','Projekti','Budget','Data Fillimit','Statusi','Verejtje'];
+  const rows = clients.map(c => [
+    '#'+String(c.id).padStart(4,'0'), c.name, c.company, c.email,
+    c.project, '€'+c.budget, c.start, c.status, c.notes.replace(/,/g,' ')
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'studio-crm-klientet.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV eksportuar me sukses.');
+}
+
+// TOAST
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+render();
+</script>
+</body>
+</html>
